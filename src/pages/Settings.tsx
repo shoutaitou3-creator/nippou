@@ -365,10 +365,6 @@ const Settings: React.FC = () => {
             onEmergencyContactPhoneChange={setEmergencyContactPhone}
             onEmergencyContactEmailChange={setEmergencyContactEmail}
             onEmergencyContactLineIdChange={setEmergencyContactLineId}
-            emergencyContactPostalCode={emergencyContactPostalCode}
-            emergencyContactAddress={emergencyContactAddress}
-            onEmergencyContactPostalCodeChange={setEmergencyContactPostalCode}
-            onEmergencyContactAddressChange={setEmergencyContactAddress}
             onEmergencyContactPostalCodeChange={setEmergencyContactPostalCode}
             onEmergencyContactAddressChange={setEmergencyContactAddress}
             onSave={handleSavePersonalInfo}

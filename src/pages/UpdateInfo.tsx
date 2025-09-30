@@ -15,7 +15,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Megaphone, Calendar, CheckCircle, Star, Zap, Shield, Users, LogIn, Clock, Settings, Copy } from 'lucide-react';
+import { ArrowLeft, Megaphone, Calendar, CheckCircle, Star, Zap, Shield, Users, LogIn, Clock, Settings, Copy, User } from 'lucide-react';
 
 const UpdateInfo: React.FC = () => {
   return (
