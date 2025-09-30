@@ -42,14 +42,68 @@ const UpdateInfo: React.FC = () => {
         </div>
 
         <div className="space-y-8">
+          {/* 2025年9月30日の更新 */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Calendar className="w-6 h-6 text-primary" />
+              <h2 className="text-xl font-semibold text-gray-800">2025年9月30日</h2>
+              <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                最新
+              </span>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="border-l-4 border-blue-500 pl-4">
+                <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-blue-500" />
+                  緊急連絡先設定の利便性を向上しました
+                </h3>
+                <p className="text-gray-700 mb-2">
+                  個人設定の緊急連絡先入力をより便利に改善しました。
+                </p>
+                <ul className="text-sm text-gray-600 space-y-1 ml-4">
+                  <li>• 居住地詳細から緊急連絡先の住所情報をワンクリックでコピーできるようになりました</li>
+                  <li>• 緊急連絡先にメールアドレスとLINE IDの入力欄を追加しました</li>
+                  <li>• 連絡先情報が3列レイアウトで見やすく整理されました</li>
+                  <li>• 同じ住所を2回入力する手間が省けるようになりました</li>
+                </ul>
+                <div className="mt-2 p-2 bg-blue-50 rounded text-sm text-blue-700">
+                  <strong>使い方：</strong>
+                  <ul className="mt-1 space-y-1">
+                    <li>• 居住地詳細で郵便番号と住所を入力</li>
+                    <li>• 緊急連絡先の郵便番号欄にある「居住地からコピー」ボタンをクリック</li>
+                    <li>• 郵便番号と住所が自動的にコピーされます</li>
+                    <li>• 電話番号、メールアドレス、LINE IDを入力して完了</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="border-l-4 border-green-500 pl-4">
+                <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                  <User className="w-4 h-4 text-green-500" />
+                  個人情報入力フォームの整理
+                </h3>
+                <p className="text-gray-700 mb-2">
+                  個人情報設定画面の表示を整理し、より分かりやすく改善しました。
+                </p>
+                <ul className="text-sm text-gray-600 space-y-1 ml-4">
+                  <li>• 緊急連絡先の項目名から重複した「緊急連絡先」という文言を削除</li>
+                  <li>• 見出しで明確に示されているため、項目名をシンプルに変更</li>
+                  <li>• 氏名ふりがなフィールドを追加して、より詳細な情報管理が可能に</li>
+                  <li>• フォームの視認性と操作性が向上しました</li>
+                </ul>
+                <div className="mt-2 p-2 bg-green-50 rounded text-sm text-green-700">
+                  <strong>改善効果：</strong>重複表示が解消され、必要な情報をより効率的に入力できるようになりました
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* 2025年9月14日の更新 */}
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center gap-3 mb-4">
               <Calendar className="w-6 h-6 text-primary" />
               <h2 className="text-xl font-semibold text-gray-800">2025年9月14日</h2>
-              <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                最新
-              </span>
             </div>
             
             <div className="space-y-4">
