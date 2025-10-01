@@ -7,8 +7,9 @@ import { usePreviousDayReport } from '../hooks/usePreviousDayReport';
 import Header from '../components/Header';
 import DailyReportHeader from '../components/daily-report/DailyReportHeader';
 import TodayScheduleSection from '../components/daily-report/TodayScheduleSection';
-import ReportSection from '../components/daily-report/ReportSection';
+import ReportSectionNew from '../components/daily-report/ReportSectionNew';
 import WorkTimeSection from '../components/daily-report/WorkTimeSection';
+import { useUserTemplates } from '../hooks/useUserTemplates';
 import PreviousDayReportHeader from '../components/previous-day-report/PreviousDayReportHeader';
 import SubmissionStatusCard from '../components/previous-day-report/SubmissionStatusCard';
 import OperationGuideCard from '../components/previous-day-report/OperationGuideCard';
@@ -54,8 +55,13 @@ const PreviousDayReport: React.FC = () => {
   } = useCalendar(user);
   
   // 状態管理
-  const [reportContent, setReportContent] = useState('');
-  const [showQuickInsert, setShowQuickInsert] = useState(false);
+  const [reportFields, setReportFields] = useState({
+    positive_reactions: '',
+    achievements: '',
+    challenges_issues: '',
+    lessons_learned: '',
+    other_notes: ''
+  });
   const [workStartTime, setWorkStartTime] = useState('09:00');
   const [workEndTime, setWorkEndTime] = useState('18:00');
   const [calendarEvents, setCalendarEvents] = useState<InternalCalendarEvent[]>([]);
@@ -74,40 +80,13 @@ const PreviousDayReport: React.FC = () => {
     loadExistingReport,
     handleSave: handleSaveReport
   } = usePreviousDayReport(user, yesterdayDateString);
+
+  const { templates } = useUserTemplates(user);
   
   // 報告内容変更ハンドラー
-  const handleReportContentChange = useCallback((value: string) => {
-    setReportContent(value);
+  const handleFieldChange = useCallback((field: string, value: string) => {
+    setReportFields(prev => ({ ...prev, [field]: value }));
   }, []);
-
-  // デフォルトテキスト
-  const defaultReportText = `・お客様の良い反応：
-・達成できたこと：
-・課題や問題点：
-・次回に活かすこと：
-・その他報告事項：`;
-
-  // 定型文挿入処理
-  const handleQuickInsert = useCallback((text: string) => {
-    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const before = reportContent.substring(0, start);
-      const after = reportContent.substring(end);
-      const newContent = before + text + after;
-      setReportContent(newContent);
-      
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + text.length;
-        textarea.focus();
-      }, 0);
-    } else {
-      const newContent = reportContent + (reportContent.endsWith('\n') ? '' : '\n') + text;
-      setReportContent(newContent);
-    }
-    setShowQuickInsert(false);
-  }, [reportContent]);
 
   // イベントモーダル管理
   const {
@@ -239,13 +218,14 @@ const PreviousDayReport: React.FC = () => {
         if (report) {
           console.log('日報が見つかりました - 設定中...');
           setExistingReport(report);
-          // 既存の日報内容がある場合はそれを使用、なければデフォルトテキスト
-          const existingContent = report.work_content;
-          if (!existingContent || existingContent.trim() === '' || existingContent === defaultReportText) {
-            setReportContent(defaultReportText);
-          } else {
-            setReportContent(existingContent);
-          }
+          // 既存の日報内容を各フィールドに設定
+          setReportFields({
+            positive_reactions: report.positive_reactions || '',
+            achievements: report.achievements || '',
+            challenges_issues: report.challenges_issues || '',
+            lessons_learned: report.lessons_learned || '',
+            other_notes: report.other_notes || ''
+          });
           setWorkStartTime(report.work_start_time || '09:00');
           setWorkEndTime(report.work_end_time || '18:00');
           
@@ -268,16 +248,12 @@ const PreviousDayReport: React.FC = () => {
           console.log('日報が存在するため、プロンプトは表示しません');
         } else {
           console.log('日報が見つからないため、カレンダー取得プロンプトを表示');
-          // 新規日報の場合はデフォルトテキストを設定
-          setReportContent(defaultReportText);
           // 日報が存在しない場合、カレンダー取得プロンプトを表示
           setShowCalendarFetchPrompt(true);
           console.log('プロンプト表示状態を設定: true');
         }
       } catch (error) {
         console.error('初期データ読み込みエラー:', error);
-        // エラーが発生した場合もデフォルトテキストを設定
-        setReportContent(defaultReportText);
         // エラーが発生した場合もプロンプトは表示しない
         setShowCalendarFetchPrompt(false);
         console.log('エラー発生のため、プロンプト表示状態を false に設定');
@@ -306,16 +282,16 @@ const PreviousDayReport: React.FC = () => {
 
   // 保存・提出処理
   const onSave = () => {
-    handleSaveReport(reportContent, workStartTime, workEndTime, calendarEvents, true);
+    handleSaveReport(reportFields, workStartTime, workEndTime, calendarEvents, true);
   };
-  
+
   const onSubmit = () => {
     setShowSubmitConfirmDialog(true);
   };
-  
+
   const handleConfirmSubmit = () => {
     setShowSubmitConfirmDialog(false);
-    handleSaveReport(reportContent, workStartTime, workEndTime, calendarEvents, false);
+    handleSaveReport(reportFields, workStartTime, workEndTime, calendarEvents, false);
   };
   
   const handleCancelSubmit = () => {
@@ -413,12 +389,10 @@ const PreviousDayReport: React.FC = () => {
             />
 
             {/* 報告事項 */}
-            <ReportSection
-              reportContent={reportContent}
-              onReportContentChange={(e) => handleReportContentChange(e.target.value)}
-              showQuickInsert={showQuickInsert}
-              onToggleQuickInsert={() => setShowQuickInsert(!showQuickInsert)}
-              onQuickInsert={handleQuickInsert}
+            <ReportSectionNew
+              reportFields={reportFields}
+              onFieldChange={handleFieldChange}
+              templates={templates}
               isReadOnly={isReadOnly}
             />
           </div>

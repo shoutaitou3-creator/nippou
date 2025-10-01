@@ -16,21 +16,46 @@ export class ReportSection {
     this.doc.text('Daily Report Content', this.margin, currentY);
     currentY += 8;
 
-    if (dailyReport?.work_content && dailyReport.work_content.trim() !== '') {
-      this.doc.setFontSize(10);
-      this.doc.setFont('helvetica', 'normal');
-      const content = TextUtils.wrapText(TextUtils.convertJapaneseToEnglish(dailyReport.work_content), 85);
-      content.forEach(line => {
-        this.doc.text(line, this.margin, currentY);
-        currentY += this.lineHeight;
-      });
-    } else {
+    const fields = [
+      { label: 'Positive Reactions', value: dailyReport?.positive_reactions },
+      { label: 'Achievements', value: dailyReport?.achievements },
+      { label: 'Challenges/Issues', value: dailyReport?.challenges_issues },
+      { label: 'Lessons Learned', value: dailyReport?.lessons_learned },
+      { label: 'Other Notes', value: dailyReport?.other_notes }
+    ];
+
+    let hasContent = false;
+
+    fields.forEach(field => {
+      if (field.value && field.value.trim() !== '') {
+        hasContent = true;
+
+        // フィールドラベル
+        this.doc.setFontSize(11);
+        this.doc.setFont('helvetica', 'bold');
+        this.doc.text(field.label + ':', this.margin, currentY);
+        currentY += 6;
+
+        // フィールド内容
+        this.doc.setFontSize(10);
+        this.doc.setFont('helvetica', 'normal');
+        const content = TextUtils.wrapText(TextUtils.convertJapaneseToEnglish(field.value), 85);
+        content.forEach(line => {
+          this.doc.text(line, this.margin + 3, currentY);
+          currentY += this.lineHeight;
+        });
+
+        currentY += 3; // フィールド間のスペース
+      }
+    });
+
+    if (!hasContent) {
       this.doc.setFontSize(10);
       this.doc.setFont('helvetica', 'normal');
       this.doc.text('No report content entered', this.margin, currentY);
       currentY += this.lineHeight;
     }
-    
+
     currentY += 5;
     return currentY;
   }

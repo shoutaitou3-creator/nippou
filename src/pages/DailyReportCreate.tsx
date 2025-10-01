@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCalendarData } from '../hooks/useCalendarData';
@@ -9,6 +9,7 @@ import { getJSTDate, formatJSTDateToYYYYMMDD, formatJSTDateForDisplay, parseJSTD
 import Header from '../components/Header';
 import DailyReportHeader from '../components/daily-report/DailyReportHeader';
 import DailyReportFormContent from '../components/daily-report/DailyReportFormContent';
+import { useUserTemplates } from '../hooks/useUserTemplates';
 import RefetchCalendarButton from '../components/daily-report/RefetchCalendarButton';
 import SubmittedReportConfirmationDialog from '../components/daily-report/SubmittedReportConfirmationDialog';
 import RefetchCalendarConfirmationDialog from '../components/daily-report/RefetchCalendarConfirmationDialog';
@@ -27,15 +28,13 @@ const DailyReportCreate: React.FC = () => {
     return getJSTDate();
   });
 
-  // デフォルトテキストを設定
-  const defaultReportText = `・お客様の良い反応：
-・達成できたこと：
-・課題や問題点：
-・次回に活かすこと：
-・その他報告事項：`;
-
-  const [reportContent, setReportContent] = useState(defaultReportText);
-  const [showQuickInsert, setShowQuickInsert] = useState(false);
+  const [reportFields, setReportFields] = useState({
+    positive_reactions: '',
+    achievements: '',
+    challenges_issues: '',
+    lessons_learned: '',
+    other_notes: ''
+  });
   const [workStartTime, setWorkStartTime] = useState('09:00');
   const [workEndTime, setWorkEndTime] = useState('18:00');
   const [internalCalendarEvents, setInternalCalendarEvents] = useState<InternalCalendarEvent[]>([]);
@@ -140,6 +139,8 @@ const DailyReportCreate: React.FC = () => {
     handleSubmit
   } = useReportData(user, isDevMode);
 
+  const { templates } = useUserTemplates(user);
+
   // イベントモーダル管理
   const {
     openEditModal,
@@ -196,13 +197,14 @@ const DailyReportCreate: React.FC = () => {
         
         if (existingReport) {
           setExistingReport(existingReport);
-          // 既存の日報内容がある場合はそれを使用、なければデフォルトテキスト
-          const existingContent = existingReport.work_content;
-          if (!existingContent || existingContent.trim() === '' || existingContent === defaultReportText) {
-            setReportContent(defaultReportText);
-          } else {
-            setReportContent(existingContent);
-          }
+          // 既存の日報内容を各フィールドに設定
+          setReportFields({
+            positive_reactions: existingReport.positive_reactions || '',
+            achievements: existingReport.achievements || '',
+            challenges_issues: existingReport.challenges_issues || '',
+            lessons_learned: existingReport.lessons_learned || '',
+            other_notes: existingReport.other_notes || ''
+          });
           setWorkStartTime(existingReport.work_start_time || '09:00');
           setWorkEndTime(existingReport.work_end_time || '18:00');
           
@@ -233,8 +235,6 @@ const DailyReportCreate: React.FC = () => {
           // 新規日報の場合は設定から標準勤務時間を取得
           console.log('=== 新規日報のため、設定から標準勤務時間を取得 ===');
           await loadWorkTimesFromSettings(dateString);
-          
-          setReportContent(defaultReportText);
           setIsReadOnly(false);
           
           // 新規日報の場合のみGoogleカレンダーから取得
@@ -247,29 +247,9 @@ const DailyReportCreate: React.FC = () => {
     }
   }, [selectedDate, fetchCalendarEvents, loadExistingReport, setCalendarEvents, convertToInternalEvents, user]);
 
-  const handleQuickInsert = (text: string) => {
-    // カーソル位置に挿入するか、末尾に追加
-    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const before = reportContent.substring(0, start);
-      const after = reportContent.substring(end);
-      const newContent = before + text + after;
-      setReportContent(newContent);
-      
-      // カーソル位置を調整
-      setTimeout(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + text.length;
-        textarea.focus();
-      }, 0);
-    } else {
-      // フォールバック: 末尾に追加
-      const newContent = reportContent + (reportContent.endsWith('\n') ? '' : '\n') + text;
-      setReportContent(newContent);
-    }
-    setShowQuickInsert(false);
-  };
+  const handleFieldChange = useCallback((field: string, value: string) => {
+    setReportFields(prev => ({ ...prev, [field]: value }));
+  }, []);
 
   // 提出済み日報の編集確認ダイアログの処理
   const handleEditSubmittedYes = () => {
@@ -297,9 +277,13 @@ const DailyReportCreate: React.FC = () => {
     report_date: formatJSTDateToYYYYMMDD(selectedDate),
     work_start_time: workStartTime,
     work_end_time: workEndTime,
-    work_content: reportContent,
+    positive_reactions: reportFields.positive_reactions,
+    achievements: reportFields.achievements,
+    challenges_issues: reportFields.challenges_issues,
+    lessons_learned: reportFields.lessons_learned,
+    other_notes: reportFields.other_notes,
     calendar_events: internalCalendarEvents,
-    draft_status: existingReport?.draft_status ?? true, // Maintain existing draft status or default to true
+    draft_status: existingReport?.draft_status ?? true,
     submitted_at: existingReport?.submitted_at || undefined,
     created_at: existingReport?.created_at || undefined,
     updated_at: existingReport?.updated_at || undefined,
@@ -308,8 +292,8 @@ const DailyReportCreate: React.FC = () => {
   const formattedReportDate = formatJSTDateForDisplay(selectedDate);
   const reporterUserName = user?.user_metadata?.full_name || user?.email || 'ユーザー';
 
-  const onSave = () => handleSave(selectedDate, reportContent, internalCalendarEvents, workStartTime, workEndTime);
-  const onSubmit = () => handleSubmit(selectedDate, reportContent, internalCalendarEvents, workStartTime, workEndTime);
+  const onSave = () => handleSave(selectedDate, reportFields, internalCalendarEvents, workStartTime, workEndTime);
+  const onSubmit = () => handleSubmit(selectedDate, reportFields, internalCalendarEvents, workStartTime, workEndTime);
 
   // Googleカレンダー再取得の処理
   const handleRefetchCalendar = () => {
@@ -405,12 +389,10 @@ const DailyReportCreate: React.FC = () => {
           onEditEvent={openEditModal}
           isReadOnly={isReadOnly}
           onShowScreenshot={handleShowScreenshot}
-          reportContent={reportContent}
-          onReportContentChange={(e) => setReportContent(e.target.value)}
-          showQuickInsert={showQuickInsert}
-          onToggleQuickInsert={() => setShowQuickInsert(!showQuickInsert)}
-          onQuickInsert={handleQuickInsert}
-          dailyReport={currentDailyReport} // Pass the constructed dailyReport
+          reportFields={reportFields}
+          onFieldChange={handleFieldChange}
+          templates={templates}
+          dailyReport={currentDailyReport}
           reportDate={formattedReportDate}
           userName={reporterUserName}
         />

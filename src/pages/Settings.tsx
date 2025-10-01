@@ -6,7 +6,9 @@ import StandardWorkTimeSettings from '../components/settings/StandardWorkTimeSet
 import EmployeeInfoSettings from '../components/settings/EmployeeInfoSettings';
 import PersonalInfoSettings from '../components/settings/PersonalInfoSettings';
 import FutureFeaturesSection from '../components/settings/FutureFeaturesSection';
+import TemplateManagement from '../components/settings/TemplateManagement';
 import { Settings as SettingsIcon } from 'lucide-react';
+import { useUserTemplates } from '../hooks/useUserTemplates';
 
 const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -52,6 +54,9 @@ const Settings: React.FC = () => {
   const [emergencyContactAddress, setEmergencyContactAddress] = useState('');
   const [isSavingPersonalInfo, setIsSavingPersonalInfo] = useState(false);
   const [personalInfoSaveMessage, setPersonalInfoSaveMessage] = useState('');
+
+  // テンプレート管理
+  const { templates, addTemplate, updateTemplate, deleteTemplate, isSaving: isSavingTemplate } = useUserTemplates(user);
 
   const handleSignOut = React.useCallback(async () => {
     try {
@@ -331,6 +336,15 @@ const Settings: React.FC = () => {
             isSaving={isSavingProfile}
           />
           
+          {/* テンプレート管理 */}
+          <TemplateManagement
+            templates={templates}
+            onAddTemplate={addTemplate}
+            onUpdateTemplate={updateTemplate}
+            onDeleteTemplate={deleteTemplate}
+            isSaving={isSavingTemplate}
+          />
+
           {/* 個人情報設定 */}
           <PersonalInfoSettings
             profileBirthDate={profileBirthDate}

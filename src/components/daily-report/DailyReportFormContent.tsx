@@ -1,8 +1,8 @@
 import React from 'react';
 import WorkTimeSection from './WorkTimeSection';
 import TodayScheduleSection from './TodayScheduleSection';
-import ReportSection from './ReportSection';
-import { InternalCalendarEvent, DailyReportData } from '../../types/daily-report'; // Import DailyReportData
+import ReportSectionNew from './ReportSectionNew';
+import { InternalCalendarEvent, DailyReportData, ReportCategory, UserTemplate } from '../../types/daily-report';
 
 interface DailyReportFormContentProps {
   workStartTime: string;
@@ -16,14 +16,18 @@ interface DailyReportFormContentProps {
   onEditEvent: (event: InternalCalendarEvent) => void;
   isReadOnly: boolean;
   onShowScreenshot?: () => void;
-  reportContent: string;
-  onReportContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  showQuickInsert: boolean;
-  onToggleQuickInsert: () => void;
-  onQuickInsert: (text: string) => void;
+  reportFields: {
+    positive_reactions: string;
+    achievements: string;
+    challenges_issues: string;
+    lessons_learned: string;
+    other_notes: string;
+  };
+  onFieldChange: (field: ReportCategory, value: string) => void;
+  templates: UserTemplate[];
   // New props for copy functionality
-  dailyReport: DailyReportData | null; // Pass the full dailyReport object
-  reportDate: string; // Formatted report date string
+  dailyReport: DailyReportData | null;
+  reportDate: string;
   userName: string;
 }
 
@@ -39,12 +43,10 @@ const DailyReportFormContent: React.FC<DailyReportFormContentProps> = ({
   onEditEvent,
   isReadOnly,
   onShowScreenshot,
-  reportContent,
-  onReportContentChange,
-  showQuickInsert,
-  onToggleQuickInsert,
-  onQuickInsert,
-  dailyReport, // Destructure new props
+  reportFields,
+  onFieldChange,
+  templates,
+  dailyReport,
   reportDate,
   userName
 }) => {
@@ -71,12 +73,10 @@ const DailyReportFormContent: React.FC<DailyReportFormContentProps> = ({
         userName={userName}
       />
 
-      <ReportSection
-        reportContent={reportContent}
-        onReportContentChange={onReportContentChange}
-        showQuickInsert={showQuickInsert}
-        onToggleQuickInsert={onToggleQuickInsert}
-        onQuickInsert={onQuickInsert}
+      <ReportSectionNew
+        reportFields={reportFields}
+        onFieldChange={onFieldChange}
+        templates={templates}
         isReadOnly={isReadOnly}
       />
     </div>
