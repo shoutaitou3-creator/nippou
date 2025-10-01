@@ -9,7 +9,10 @@ export const useUserTemplates = (user: User | null, category?: ReportCategory) =
   const [error, setError] = useState<string | null>(null);
 
   const fetchTemplates = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -27,16 +30,20 @@ export const useUserTemplates = (user: User | null, category?: ReportCategory) =
 
       const { data, error: fetchError } = await query;
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error('テンプレート取得エラー:', fetchError);
+        throw fetchError;
+      }
 
       setTemplates(data || []);
     } catch (err) {
       console.error('テンプレート取得エラー:', err);
       setError(err instanceof Error ? err.message : 'テンプレートの取得に失敗しました');
+      // エラーが発生してもローディングを終了
     } finally {
       setIsLoading(false);
     }
-  }, [user, category]);
+  }, [user?.id, category]);
 
   const createTemplate = useCallback(
     async (
@@ -180,10 +187,9 @@ export const useUserTemplates = (user: User | null, category?: ReportCategory) =
   );
 
   useEffect(() => {
-    if (user) {
-      fetchTemplates();
-    }
-  }, [user?.id, category]); // fetchTemplatesを依存配列から削除して無限ループを防ぐ
+    fetchTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, category]); // fetchTemplatesを依存配列から除外（無限ループ防止）
 
   // 設定画面用の簡略化されたインターフェース
   const addTemplate = useCallback(

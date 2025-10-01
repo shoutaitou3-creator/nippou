@@ -55,7 +55,7 @@ const Settings: React.FC = () => {
   const [isSavingPersonalInfo, setIsSavingPersonalInfo] = useState(false);
   const [personalInfoSaveMessage, setPersonalInfoSaveMessage] = useState('');
 
-  // テンプレート管理
+  // テンプレート管理 - ユーザーがログインしている場合のみ有効化
   const { templates, addTemplate, updateTemplate, deleteTemplate, isSaving: isSavingTemplate } = useUserTemplates(user);
 
   const handleSignOut = React.useCallback(async () => {
