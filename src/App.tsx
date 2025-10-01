@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import DailyReportCreate from './pages/DailyReportCreate';
@@ -14,8 +14,8 @@ import UpdateInfo from './pages/UpdateInfo';
 import Requirements from './pages/Requirements';
 import ProtectedRoute from './components/ProtectedRoute';
 
-function App() {
-  const { user, loading, signOut } = useAuth();
+function AppContent() {
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -70,6 +70,14 @@ function App() {
         <Route path="/requirements" element={<Requirements />} />
       </Routes>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { useCalendar } from '../hooks/useCalendar';
 import Header from '../components/Header';
 import ScheduleCard from '../components/ScheduleCard';

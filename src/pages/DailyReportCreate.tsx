@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { useCalendarData } from '../hooks/useCalendarData';
 import { useReportData } from '../hooks/useReportData';
 import { useEventModalManager } from '../components/daily-report/EventModalManager';

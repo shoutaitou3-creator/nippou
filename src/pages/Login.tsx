@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { BookOpen, Megaphone, Code, Globe, FileText } from 'lucide-react';
 
 const Login: React.FC = () => {

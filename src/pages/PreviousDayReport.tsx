@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { useCalendar } from '../hooks/useCalendar';
 import { useEventModalManager } from '../components/daily-report/EventModalManager';
 import { usePreviousDayReport } from '../hooks/usePreviousDayReport';
