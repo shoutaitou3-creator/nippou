@@ -90,7 +90,7 @@ export const useUserTemplates = (user: User | null, category?: ReportCategory) =
         return false;
       }
     },
-    [user, fetchTemplates]
+    [user?.id, category]
   );
 
   const updateTemplate = useCallback(
@@ -120,7 +120,7 @@ export const useUserTemplates = (user: User | null, category?: ReportCategory) =
         return false;
       }
     },
-    [user, fetchTemplates]
+    [user?.id, category]
   );
 
   const deleteTemplate = useCallback(
@@ -147,7 +147,7 @@ export const useUserTemplates = (user: User | null, category?: ReportCategory) =
         return false;
       }
     },
-    [user, fetchTemplates]
+    [user?.id, category]
   );
 
   const reorderTemplates = useCallback(
@@ -183,7 +183,7 @@ export const useUserTemplates = (user: User | null, category?: ReportCategory) =
         return false;
       }
     },
-    [user, fetchTemplates]
+    [user?.id, category]
   );
 
   useEffect(() => {

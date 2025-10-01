@@ -338,27 +338,36 @@ const NextDaySettings: React.FC = () => {
     } else {
       setIsLoadingPage(false);
     }
-  }, [user, determineInitialSelectedDate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
-  // 日付変更時の処理
+  // 日付変更時の処理 - 初回ロード完了後のみ実行
   useEffect(() => {
+    // 初回ロード中は何もしない
+    if (isLoadingPage) return;
+
     console.log('=== 日付変更時の処理 ===', { selectedDate, hasCalendarPermission, calendarDataLoaded });
     if (selectedDate && selectedDate !== null) {
       loadExistingSettings(selectedDate);
-      if (hasCalendarPermission) {
+      if (hasCalendarPermission && !calendarDataLoaded) {
         setCalendarDataLoaded(false);
         setCalendarEvents([]);
         loadCalendarEvents(selectedDate);
       }
     }
-  }, [selectedDate, loadExistingSettings, hasCalendarPermission, loadCalendarEvents]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, hasCalendarPermission]);
 
   // カレンダー権限が取得できた時の処理
   useEffect(() => {
+    // 初回ロード中は何もしない
+    if (isLoadingPage) return;
+
     if (hasCalendarPermission && selectedDate && selectedDate !== null && !calendarDataLoaded) {
       loadCalendarEvents(selectedDate);
     }
-  }, [hasCalendarPermission, selectedDate, calendarDataLoaded, loadCalendarEvents]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasCalendarPermission, selectedDate, calendarDataLoaded]);
 
   // 手動でスケジュール取得
   const handleFetchSchedule = () => {

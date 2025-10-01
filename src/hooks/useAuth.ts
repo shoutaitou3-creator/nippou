@@ -10,26 +10,49 @@ export const useAuth = () => {
   const [authInitialized, setAuthInitialized] = useState(false);
 
   useEffect(() => {
-    console.log('=== useAuth初期化開始 ===', { 
-      currentPath: window.location.pathname 
+    console.log('=== useAuth初期化開始 ===', {
+      currentPath: window.location.pathname
     });
-    
+
+    // セッション取得のタイムアウトを設定
+    let sessionTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isSessionRetrieved = false;
+
     // 現在の認証状態を取得
     const getSession = async () => {
       try {
         console.log('セッション取得開始...');
+
+        // 10秒のタイムアウトを設定
+        sessionTimeout = setTimeout(() => {
+          if (!isSessionRetrieved) {
+            console.warn('=== セッション取得タイムアウト ===');
+            setUser(null);
+            setLoading(false);
+            setAuthInitialized(true);
+            isSessionRetrieved = true;
+          }
+        }, 10000);
+
         const { data: { session } } = await supabase.auth.getSession();
+
+        // タイムアウトをクリア
+        if (sessionTimeout) {
+          clearTimeout(sessionTimeout);
+        }
+        isSessionRetrieved = true;
+
         console.log('初期セッション取得結果:', {
           hasSession: !!session,
           hasUser: !!session?.user,
           userEmail: session?.user?.email,
           currentPath: window.location.pathname
         });
-        
+
         setUser(session?.user ?? null);
         setLoading(false);
         setAuthInitialized(true);
-        
+
         // 認証済みユーザーがログイン画面にいる場合、日報作成画面にリダイレクト
         if (session?.user && window.location.hash === '#/login') {
           console.log('=== 認証済みユーザーを検出、日報作成画面にリダイレクト ===');
@@ -37,6 +60,11 @@ export const useAuth = () => {
         }
       } catch (error) {
         console.error('=== セッション取得エラー ===', error);
+        if (sessionTimeout) {
+          clearTimeout(sessionTimeout);
+        }
+        isSessionRetrieved = true;
+        setUser(null);
         setLoading(false);
         setAuthInitialized(true);
       }
@@ -80,7 +108,12 @@ export const useAuth = () => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (sessionTimeout) {
+        clearTimeout(sessionTimeout);
+      }
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const signInWithGoogle = useCallback(async () => {
