@@ -30,9 +30,10 @@ interface PageState {
 }
 
 const NextDaySettings: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isDevelopmentMode } = useAuth();
   const navigate = useNavigate();
   const isInitializedRef = useRef(false);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [state, setState] = useState<PageState>({
     selectedDate: supabaseService.getTomorrowDate(),
@@ -295,7 +296,36 @@ const NextDaySettings: React.FC = () => {
     if (user && !isInitializedRef.current) {
       loadInitialData();
     }
-  }, [user, loadInitialData]);
+
+    if (isDevelopmentMode && !isInitializedRef.current) {
+      loadingTimeoutRef.current = setTimeout(() => {
+        console.log('=== NextDaySettings: 開発モードでタイムアウト、デフォルト値で表示 ===');
+        if (!isInitializedRef.current) {
+          const tomorrow = supabaseService.getTomorrowDate();
+          const defaults = supabaseService.getDefaultWorkTimes();
+
+          updateState({
+            selectedDate: tomorrow,
+            startTime: defaults.startTime,
+            endTime: defaults.endTime,
+            notes: '',
+            calendarEvents: [],
+            hasExistingSettings: false,
+            hasCalendarPermission: false,
+            loadingState: 'ready'
+          });
+
+          isInitializedRef.current = true;
+        }
+      }, 8000);
+    }
+
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [user, loadInitialData, isDevelopmentMode, updateState]);
 
   if (state.loadingState === 'initial' || state.loadingState === 'loading') {
     return (
@@ -305,6 +335,11 @@ const NextDaySettings: React.FC = () => {
           <div className="text-center py-12">
             <div className="w-8 h-8 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
             <p className="text-gray-500">翌勤務日設定を読み込み中...</p>
+            {isDevelopmentMode && (
+              <p className="text-blue-600 text-sm mt-4">
+                開発モード: 8秒後に自動的にデフォルト値で表示されます
+              </p>
+            )}
           </div>
         </main>
       </div>

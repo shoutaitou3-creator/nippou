@@ -7,19 +7,30 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading, authInitialized } = useAuth();
+  const { user, loading, authInitialized, isDevelopmentMode } = useAuth();
   const location = useLocation();
   const [showTimeoutWarning, setShowTimeoutWarning] = React.useState(false);
+  const [allowBypass, setAllowBypass] = React.useState(false);
 
   console.log('=== ProtectedRoute 状態チェック ===', {
     hasUser: !!user,
     authInitialized,
+    isDevelopmentMode,
     userEmail: user?.email,
     currentPath: window.location.pathname
   });
 
-  // 開発モードのチェック（URLにdev=trueが含まれている場合）
-  const isDevelopmentMode = new URLSearchParams(location.search).get('dev') === 'true';
+  // 開発モードでは10秒後に認証なしでも画面表示を許可
+  React.useEffect(() => {
+    if (isDevelopmentMode && !authInitialized) {
+      const bypassTimeout = setTimeout(() => {
+        console.log('=== ProtectedRoute: 開発モードでタイムアウト、認証をバイパス ===');
+        setAllowBypass(true);
+      }, 10000);
+
+      return () => clearTimeout(bypassTimeout);
+    }
+  }, [isDevelopmentMode, authInitialized]);
 
   // 5秒後にタイムアウト警告を表示
   React.useEffect(() => {
@@ -32,8 +43,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     }
   }, [authInitialized]);
 
-  if (isDevelopmentMode) {
-    console.log('=== ProtectedRoute: 開発モード検出、認証をスキップ ===');
+  // 開発モードでバイパスが許可された場合
+  if (isDevelopmentMode && allowBypass) {
+    console.log('=== ProtectedRoute: 開発モードでバイパス許可、コンテンツを表示 ===');
     return <>{children}</>;
   }
 
@@ -45,6 +57,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
           <div className="text-primary text-lg text-center">認証状態を確認中...</div>
           <div className="text-gray-500 text-sm text-center mt-2">しばらくお待ちください</div>
+
+          {isDevelopmentMode && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-700 text-center">
+                開発モード: 10秒後に自動的に画面が表示されます
+              </p>
+            </div>
+          )}
 
           {showTimeoutWarning && (
             <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">

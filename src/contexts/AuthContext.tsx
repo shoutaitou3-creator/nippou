@@ -7,17 +7,34 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   authInitialized: boolean;
+  isDevelopmentMode: boolean;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<{ success: boolean }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const isDevelopmentEnvironment = (): boolean => {
+  const hostname = window.location.hostname;
+  const isDev = hostname.includes('bolt.new') ||
+                hostname.includes('stackblitz') ||
+                hostname.includes('localhost') ||
+                hostname === '127.0.0.1';
+
+  console.log('=== 開発環境チェック ===', {
+    hostname,
+    isDevelopmentMode: isDev
+  });
+
+  return isDev;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [authInitialized, setAuthInitialized] = useState(false);
+  const [isDevelopmentMode] = useState(isDevelopmentEnvironment());
 
   useEffect(() => {
     console.log('=== AuthProvider 初期化開始 ===', {
@@ -206,7 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, authInitialized, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, authInitialized, isDevelopmentMode, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
