@@ -21,12 +21,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // 開発モードのチェック（URLにdev=trueが含まれている場合）
   const isDevelopmentMode = new URLSearchParams(location.search).get('dev') === 'true';
 
-  // 15秒後にタイムアウト警告を表示
+  // 5秒後にタイムアウト警告を表示
   React.useEffect(() => {
     if (!authInitialized) {
       const timeoutId = setTimeout(() => {
         setShowTimeoutWarning(true);
-      }, 15000);
+      }, 5000);
 
       return () => clearTimeout(timeoutId);
     }

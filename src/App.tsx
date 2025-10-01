@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import DailyReportCreate from './pages/DailyReportCreate';
@@ -14,21 +14,11 @@ import UpdateInfo from './pages/UpdateInfo';
 import Requirements from './pages/Requirements';
 import ProtectedRoute from './components/ProtectedRoute';
 
-function AppContent() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
+function App() {
   return (
-    <div>
+    <AuthProvider>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/daily-report-create" replace /> : <Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navigate to="/daily-report-create" replace />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -69,14 +59,6 @@ function AppContent() {
         <Route path="/update-info" element={<UpdateInfo />} />
         <Route path="/requirements" element={<Requirements />} />
       </Routes>
-    </div>
-  );
-}
-
-function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
     </AuthProvider>
   );
 }

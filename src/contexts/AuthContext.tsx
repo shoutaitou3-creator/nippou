@@ -33,20 +33,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         sessionTimeout = setTimeout(() => {
           if (!isSessionRetrieved) {
-            console.warn('=== セッション取得タイムアウト ===');
+            console.warn('=== セッション取得タイムアウト (5秒) - 認証なしで継続 ===');
             setUser(null);
             setLoading(false);
             setAuthInitialized(true);
             isSessionRetrieved = true;
           }
-        }, 10000);
+        }, 5000);
 
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
 
         if (sessionTimeout) {
           clearTimeout(sessionTimeout);
         }
         isSessionRetrieved = true;
+
+        if (error) {
+          console.error('=== セッション取得エラー ===', error);
+          setUser(null);
+          setLoading(false);
+          setAuthInitialized(true);
+          return;
+        }
 
         console.log('初期セッション取得結果:', {
           hasSession: !!session,
@@ -64,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           navigate('/daily-report-create');
         }
       } catch (error) {
-        console.error('=== セッション取得エラー ===', error);
+        console.error('=== セッション取得例外 ===', error);
         if (sessionTimeout) {
           clearTimeout(sessionTimeout);
         }
