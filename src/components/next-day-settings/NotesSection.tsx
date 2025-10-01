@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Plus } from 'lucide-react';
 import { getJSTDate, parseJSTDateString } from '../../utils/dateUtils';
 
@@ -13,7 +13,7 @@ interface NotesSectionProps {
   selectedDate?: string;
 }
 
-const NotesSection: React.FC<NotesSectionProps> = ({
+const NotesSection: React.FC<NotesSectionProps> = memo(({
   notes,
   onNotesChange,
   showQuickInsert,
@@ -133,6 +133,8 @@ const NotesSection: React.FC<NotesSectionProps> = ({
       )}
     </div>
   );
-};
+});
+
+NotesSection.displayName = 'NotesSection';
 
 export default NotesSection;

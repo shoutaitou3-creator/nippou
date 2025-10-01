@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Calendar, Clock } from 'lucide-react';
 import TimeDropdown from '../daily-report/TimeDropdown';
 
@@ -13,7 +13,7 @@ interface DateTimeSettingsProps {
   formatSelectedDate: (dateString: string) => string;
 }
 
-const DateTimeSettings: React.FC<DateTimeSettingsProps> = ({
+const DateTimeSettings: React.FC<DateTimeSettingsProps> = memo(({
   selectedDate,
   startTime,
   endTime,
@@ -85,6 +85,8 @@ const DateTimeSettings: React.FC<DateTimeSettingsProps> = ({
       </div>
     </div>
   );
-};
+});
+
+DateTimeSettings.displayName = 'DateTimeSettings';
 
 export default DateTimeSettings;

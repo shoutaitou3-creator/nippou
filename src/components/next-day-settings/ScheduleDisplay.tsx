@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import { CalendarEvent } from '../../types/calendar';
 
@@ -10,7 +10,7 @@ interface ScheduleDisplayProps {
   onFetchSchedule: () => void;
 }
 
-const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({
+const ScheduleDisplay: React.FC<ScheduleDisplayProps> = memo(({
   calendarEvents,
   calendarLoading,
   calendarError,
@@ -101,6 +101,8 @@ const ScheduleDisplay: React.FC<ScheduleDisplayProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ScheduleDisplay.displayName = 'ScheduleDisplay';
 
 export default ScheduleDisplay;
