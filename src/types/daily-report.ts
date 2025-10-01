@@ -16,7 +16,11 @@ export interface DailyReportData {
   report_date: string;
   work_start_time?: string;
   work_end_time?: string;
-  work_content: string;
+  positive_reactions: string;
+  achievements: string;
+  challenges_issues: string;
+  lessons_learned: string;
+  other_notes: string;
   business_results?: string;
   challenges?: string;
   report_notes?: string;
@@ -31,4 +35,28 @@ export interface DailyReportData {
 export interface SaveMessage {
   type: 'success' | 'error';
   message: string;
+}
+
+export type ReportCategory =
+  | 'positive_reactions'
+  | 'achievements'
+  | 'challenges_issues'
+  | 'lessons_learned'
+  | 'other_notes';
+
+export interface UserTemplate {
+  id: string;
+  user_id: string;
+  category: ReportCategory;
+  template_name: string;
+  template_content: string;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReportField {
+  key: ReportCategory;
+  label: string;
+  placeholder: string;
 }

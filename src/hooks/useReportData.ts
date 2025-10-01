@@ -96,9 +96,15 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
   }, [user, isDevMode]);
 
   const handleSave = useCallback(async (
-    selectedDate: Date, 
-    reportContent: string, 
-    calendarEvents: InternalCalendarEvent[], 
+    selectedDate: Date,
+    reportFields: {
+      positive_reactions: string;
+      achievements: string;
+      challenges_issues: string;
+      lessons_learned: string;
+      other_notes: string;
+    },
+    calendarEvents: InternalCalendarEvent[],
     workStartTime?: string,
     workEndTime?: string,
     draftStatus: boolean = true
@@ -124,7 +130,11 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
         report_date: dateString,
         work_start_time: workStartTime,
         work_end_time: workEndTime,
-        work_content: reportContent,
+        positive_reactions: reportFields.positive_reactions,
+        achievements: reportFields.achievements,
+        challenges_issues: reportFields.challenges_issues,
+        lessons_learned: reportFields.lessons_learned,
+        other_notes: reportFields.other_notes,
         calendar_events: calendarEvents,
         draft_status: draftStatus,
         submitted_at: draftStatus ? null : new Date().toISOString(),
@@ -134,8 +144,8 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
 
       const { error } = await supabase
         .from('daily_reports')
-        .upsert(reportData, { 
-          onConflict: 'user_id,report_date' 
+        .upsert(reportData, {
+          onConflict: 'user_id,report_date'
         });
 
       if (error) {
@@ -144,7 +154,7 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
 
       setSaveMessage(draftStatus ? '下書きを保存しました' : '日報を提出しました');
       setTimeout(() => setSaveMessage(''), 3000);
-      
+
     } catch (error: any) {
       console.error('保存エラー:', error);
       setSaveMessage('保存に失敗しました: ' + error.message);
@@ -155,18 +165,18 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
   }, [user, isDevMode]);
 
   const handleSubmit = useCallback(async (
-    selectedDate: Date, 
-    reportContent: string, 
+    selectedDate: Date,
+    reportFields: {
+      positive_reactions: string;
+      achievements: string;
+      challenges_issues: string;
+      lessons_learned: string;
+      other_notes: string;
+    },
     calendarEvents: InternalCalendarEvent[],
     workStartTime?: string,
     workEndTime?: string
   ) => {
-    if (reportContent.length < 60) {
-      setSubmitMessage('報告事項は60文字以上入力してください');
-      setTimeout(() => setSubmitMessage(''), 3000);
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       if (isDevMode && !user) {
@@ -188,7 +198,11 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
         report_date: dateString,
         work_start_time: workStartTime,
         work_end_time: workEndTime,
-        work_content: reportContent,
+        positive_reactions: reportFields.positive_reactions,
+        achievements: reportFields.achievements,
+        challenges_issues: reportFields.challenges_issues,
+        lessons_learned: reportFields.lessons_learned,
+        other_notes: reportFields.other_notes,
         calendar_events: calendarEvents,
         draft_status: false,
         submitted_at: new Date().toISOString(),
@@ -198,22 +212,22 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
 
       const { error } = await supabase
         .from('daily_reports')
-        .upsert(reportData, { 
-          onConflict: 'user_id,report_date' 
+        .upsert(reportData, {
+          onConflict: 'user_id,report_date'
         });
 
       if (error) {
         throw error;
       }
-      
+
       setSubmitMessage('日報を提出しました');
       setTimeout(() => setSubmitMessage(''), 3000);
-      
+
       // 日報提出後に勤務時間画面に遷移
       setTimeout(() => {
         navigate('/next-day-settings');
       }, 500);
-      
+
     } catch (error: any) {
       console.error('提出エラー:', error);
       setSubmitMessage('提出に失敗しました: ' + error.message);
@@ -221,7 +235,7 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [user, isDevMode]);
+  }, [user, isDevMode, navigate]);
 
   return {
     isSaving,

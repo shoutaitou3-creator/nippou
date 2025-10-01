@@ -68,7 +68,13 @@ export const usePreviousDayReport = (user: User | null, yesterdayDateString: str
 
   // 保存・提出処理
   const handleSave = useCallback(async (
-    reportContent: string,
+    reportFields: {
+      positive_reactions: string;
+      achievements: string;
+      challenges_issues: string;
+      lessons_learned: string;
+      other_notes: string;
+    },
     workStartTime: string,
     workEndTime: string,
     calendarEvents: InternalCalendarEvent[],
@@ -80,26 +86,22 @@ export const usePreviousDayReport = (user: User | null, yesterdayDateString: str
       return;
     }
 
-    if (!draftStatus && reportContent.length < 50) {
-    }
-    if (!draftStatus && reportContent.length < 60) {
-      setSubmitMessage('報告事項は60文字以上入力してください');
-      setTimeout(() => setSubmitMessage(''), 3000);
-      return;
-    }
-
     const setSaving = draftStatus ? setIsSaving : setIsSubmitting;
     const setMessage = draftStatus ? setSaveMessage : setSubmitMessage;
-    
+
     setSaving(true);
-    
+
     try {
       const reportData = {
         user_id: user.id,
         report_date: yesterdayDateString,
         work_start_time: workStartTime,
         work_end_time: workEndTime,
-        work_content: reportContent,
+        positive_reactions: reportFields.positive_reactions,
+        achievements: reportFields.achievements,
+        challenges_issues: reportFields.challenges_issues,
+        lessons_learned: reportFields.lessons_learned,
+        other_notes: reportFields.other_notes,
         calendar_events: calendarEvents,
         draft_status: draftStatus,
         submitted_at: draftStatus ? null : new Date().toISOString(),
@@ -109,8 +111,8 @@ export const usePreviousDayReport = (user: User | null, yesterdayDateString: str
 
       const { error } = await supabase
         .from('daily_reports')
-        .upsert(reportData, { 
-          onConflict: 'user_id,report_date' 
+        .upsert(reportData, {
+          onConflict: 'user_id,report_date'
         });
 
       if (error) {
@@ -120,14 +122,14 @@ export const usePreviousDayReport = (user: User | null, yesterdayDateString: str
       const message = draftStatus ? '下書きを保存しました' : '日報を提出しました';
       setMessage(message);
       setTimeout(() => setMessage(''), 3000);
-      
+
       // 日報提出後に勤務時間画面に遷移
       if (!draftStatus) {
         setTimeout(() => {
           navigate('/next-day-settings');
         }, 500);
       }
-      
+
     } catch (error: any) {
       console.error('保存エラー:', error);
       const errorMessage = `${draftStatus ? '保存' : '提出'}に失敗しました: ${error.message}`;
