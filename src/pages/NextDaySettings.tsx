@@ -269,7 +269,7 @@ const NextDaySettings: React.FC = () => {
   const loadExistingSettings = useCallback(async (date: string) => {
     if (!user) return;
 
-    console.log('=== loadExistingSettings 開始 ===', { date, userId: user.id });
+    console.log('=== loadExistingSettings 開始 ===', { date, userId: user.id, timestamp: new Date().toISOString() });
 
     try {
       setIsLoadingSettings(true);
@@ -280,7 +280,7 @@ const NextDaySettings: React.FC = () => {
         .eq('work_date', date)
         .single();
 
-      console.log('=== Supabase クエリ結果 ===', { data, error });
+      console.log('=== Supabase クエリ結果 ===', { data, error, timestamp: new Date().toISOString() });
 
       if (error && error.code !== 'PGRST116') {
         console.error('既存設定読み込みエラー:', error);
@@ -299,11 +299,11 @@ const NextDaySettings: React.FC = () => {
         // データベースの時間が '00:00:00' 形式の場合は 'HH:MM' 形式に変換
         const startTimeFormatted = data.start_time ? data.start_time.substring(0, 5) : '09:00';
         const endTimeFormatted = data.end_time ? data.end_time.substring(0, 5) : '18:00';
-        
+
         // '00:00' の場合はデフォルト値を使用
         setStartTime(startTimeFormatted === '00:00' ? '09:00' : startTimeFormatted);
         setEndTime(endTimeFormatted === '00:00' ? '18:00' : endTimeFormatted);
-        
+
         setNotes(data.notes || '');
         if (data.calendar_events) {
           setCalendarEvents(data.calendar_events);
@@ -326,9 +326,10 @@ const NextDaySettings: React.FC = () => {
       setCalendarDataLoaded(false);
       setHasExistingSettings(false);
     } finally {
+      console.log('=== loadExistingSettings 完了 ===', { timestamp: new Date().toISOString() });
       setIsLoadingSettings(false);
     }
-  }, [user]);
+  }, [user, loadStandardWorkTime]);
 
   // 初期表示時の処理
   useEffect(() => {
@@ -346,7 +347,7 @@ const NextDaySettings: React.FC = () => {
     // 初回ロード中は何もしない
     if (isLoadingPage) return;
 
-    console.log('=== 日付変更時の処理 ===', { selectedDate, hasCalendarPermission, calendarDataLoaded });
+    console.log('=== 日付変更時の処理 ===', { selectedDate, hasCalendarPermission, calendarDataLoaded, timestamp: new Date().toISOString() });
     if (selectedDate && selectedDate !== null) {
       loadExistingSettings(selectedDate);
       if (hasCalendarPermission && !calendarDataLoaded) {
@@ -363,6 +364,7 @@ const NextDaySettings: React.FC = () => {
     // 初回ロード中は何もしない
     if (isLoadingPage) return;
 
+    console.log('=== カレンダー権限チェック ===', { hasCalendarPermission, selectedDate, calendarDataLoaded, timestamp: new Date().toISOString() });
     if (hasCalendarPermission && selectedDate && selectedDate !== null && !calendarDataLoaded) {
       loadCalendarEvents(selectedDate);
     }
