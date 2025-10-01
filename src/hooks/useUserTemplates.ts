@@ -180,17 +180,36 @@ export const useUserTemplates = (user: User | null, category?: ReportCategory) =
   );
 
   useEffect(() => {
-    fetchTemplates();
-  }, [fetchTemplates]);
+    if (user) {
+      fetchTemplates();
+    }
+  }, [user?.id, category]); // fetchTemplatesを依存配列から削除して無限ループを防ぐ
+
+  // 設定画面用の簡略化されたインターフェース
+  const addTemplate = useCallback(
+    async (category: ReportCategory, text: string): Promise<void> => {
+      await createTemplate(category, text, text);
+    },
+    [createTemplate]
+  );
+
+  const updateTemplateText = useCallback(
+    async (id: string, text: string): Promise<void> => {
+      await updateTemplate(id, { template_content: text });
+    },
+    [updateTemplate]
+  );
 
   return {
     templates,
     isLoading,
+    isSaving: isLoading,
     error,
     fetchTemplates,
     createTemplate,
-    updateTemplate,
+    updateTemplate: updateTemplateText,
     deleteTemplate,
     reorderTemplates,
+    addTemplate,
   };
 };

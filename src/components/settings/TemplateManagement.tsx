@@ -42,7 +42,7 @@ const TemplateManagement: React.FC<TemplateManagementProps> = ({
 
   const handleStartEdit = (template: UserTemplate) => {
     setEditingId(template.id);
-    setEditText(template.template_text);
+    setEditText(template.template_content);
   };
 
   const handleSaveEdit = async () => {
@@ -195,7 +195,7 @@ const TemplateManagement: React.FC<TemplateManagementProps> = ({
                         ) : (
                           <div className="flex justify-between items-start gap-3">
                             <p className="text-gray-700 flex-1 whitespace-pre-wrap">
-                              {template.template_text}
+                              {template.template_content}
                             </p>
                             <div className="flex gap-2">
                               <button
