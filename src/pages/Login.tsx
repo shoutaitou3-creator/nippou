@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { BookOpen, Megaphone, Code, Globe } from 'lucide-react';
+import { BookOpen, Megaphone, Code, Globe, FileText } from 'lucide-react';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -140,6 +140,13 @@ const Login: React.FC = () => {
             <BookOpen className="w-4 h-4" />
             簡易マニュアルを見る
           </Link>
+          <Link
+            to="/requirements"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+          >
+            <FileText className="w-4 h-4" />
+            要件定義書を見る
+          </Link>
         </div>
         
         {/* 開発用リンク */}
@@ -198,6 +205,13 @@ const Login: React.FC = () => {
               >
                 <Code className="w-3 h-3" />
                 設定
+              </Link>
+              <Link
+                to="/requirements"
+                className="flex items-center gap-1 px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors col-span-2"
+              >
+                <FileText className="w-3 h-3" />
+                要件定義書
               </Link>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
