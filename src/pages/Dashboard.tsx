@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCalendar } from '../hooks/useCalendar';
 import Header from '../components/Header';
@@ -6,6 +7,7 @@ import ScheduleCard from '../components/ScheduleCard';
 import SystemStatus from '../components/SystemStatus';
 import NavigationMenu from '../components/NavigationMenu';
 import { CalendarEvent } from '../types/calendar';
+import { FileText } from 'lucide-react';
 
 const today = new Date();
 const tomorrow = new Date(today);
@@ -151,6 +153,23 @@ const Dashboard: React.FC = () => {
           </div>
 
           <NavigationMenu />
+
+          {/* 要件定義書へのリンク */}
+          <div className="mt-8 bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">開発者向け情報</h3>
+                <p className="text-sm text-gray-600">システムの技術仕様や詳細な要件定義を確認できます</p>
+              </div>
+              <Link
+                to="/requirements"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-sm whitespace-nowrap"
+              >
+                <FileText className="w-5 h-5" />
+                要件定義書を見る
+              </Link>
+            </div>
+          </div>
         </main>
     </div>
   );

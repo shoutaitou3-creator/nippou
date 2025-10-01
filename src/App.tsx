@@ -11,6 +11,7 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import UserManual from './pages/UserManual';
 import UpdateInfo from './pages/UpdateInfo';
+import Requirements from './pages/Requirements';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
         } />
         <Route path="/user-manual" element={<UserManual />} />
         <Route path="/update-info" element={<UpdateInfo />} />
+        <Route path="/requirements" element={<Requirements />} />
       </Routes>
     </div>
   );
