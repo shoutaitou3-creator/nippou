@@ -48,6 +48,7 @@ const NextDaySettings: React.FC = () => {
   const [isLoadingSettings, setIsLoadingSettings] = useState(false);
   const [showQuickInsert, setShowQuickInsert] = useState(false);
   const [hasExistingSettings, setHasExistingSettings] = useState(false);
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -61,13 +62,13 @@ const NextDaySettings: React.FC = () => {
   const determineInitialSelectedDate = useCallback(async () => {
     if (!user) {
       setIsLoadingPage(false);
+      setIsInitialLoadComplete(true);
       return;
     }
 
     console.log('=== 初期日付決定開始 ===', { userId: user.id });
 
     try {
-      // 日本時間で明日の日付を取得
       const now = new Date();
       const japanTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
       const tomorrow = new Date(japanTime);
@@ -76,7 +77,6 @@ const NextDaySettings: React.FC = () => {
 
       console.log('=== 明日の日付 ===', { tomorrowDateString });
 
-      // 明日以降で最も近い翌勤務日設定を取得
       const { data: nextSettings, error } = await supabase
         .from('next_day_settings')
         .select('*')
@@ -89,10 +89,24 @@ const NextDaySettings: React.FC = () => {
 
       if (error) {
         console.error('翌勤務日設定検索エラー:', error);
-        // エラーの場合は明日の日付を使用
         setSelectedDate(tomorrowDateString);
         setHasExistingSettings(false);
-        setIsLoadingPage(false);
+
+        const { data: settings } = await supabase
+          .from('user_settings')
+          .select('default_start_time, default_end_time')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (settings) {
+          const startTimeFormatted = settings.default_start_time ? settings.default_start_time.substring(0, 5) : '09:00';
+          const endTimeFormatted = settings.default_end_time ? settings.default_end_time.substring(0, 5) : '18:00';
+          setStartTime(startTimeFormatted === '00:00' ? '09:00' : startTimeFormatted);
+          setEndTime(endTimeFormatted === '00:00' ? '18:00' : endTimeFormatted);
+        } else {
+          setStartTime('09:00');
+          setEndTime('18:00');
+        }
         return;
       }
 
@@ -103,52 +117,65 @@ const NextDaySettings: React.FC = () => {
           start_time: settings.start_time,
           end_time: settings.end_time
         });
-        
-        // 既存設定の日付を使用
+
         setSelectedDate(settings.work_date);
         setHasExistingSettings(true);
-        
-        // 設定値を反映
+
         const startTimeFormatted = settings.start_time ? settings.start_time.substring(0, 5) : '09:00';
         const endTimeFormatted = settings.end_time ? settings.end_time.substring(0, 5) : '18:00';
-        
+
         setStartTime(startTimeFormatted === '00:00' ? '09:00' : startTimeFormatted);
         setEndTime(endTimeFormatted === '00:00' ? '18:00' : endTimeFormatted);
         setNotes(settings.notes || '');
-        
-        if (settings.calendar_events) {
+
+        if (settings.calendar_events && settings.calendar_events.length > 0) {
           setCalendarEvents(settings.calendar_events);
           setCalendarDataLoaded(true);
+        } else {
+          setCalendarEvents([]);
+          setCalendarDataLoaded(false);
         }
       } else {
         console.log('=== 翌勤務日設定が見つからない、明日の日付を使用 ===');
-        // 設定が見つからない場合は明日の日付を使用
         setSelectedDate(tomorrowDateString);
         setHasExistingSettings(false);
-        
-        // 標準勤務時間を読み込み
-        await loadStandardWorkTime();
+
+        const { data: settings } = await supabase
+          .from('user_settings')
+          .select('default_start_time, default_end_time')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (settings) {
+          const startTimeFormatted = settings.default_start_time ? settings.default_start_time.substring(0, 5) : '09:00';
+          const endTimeFormatted = settings.default_end_time ? settings.default_end_time.substring(0, 5) : '18:00';
+          setStartTime(startTimeFormatted === '00:00' ? '09:00' : startTimeFormatted);
+          setEndTime(endTimeFormatted === '00:00' ? '18:00' : endTimeFormatted);
+        } else {
+          setStartTime('09:00');
+          setEndTime('18:00');
+        }
+
         setNotes('');
         setCalendarEvents([]);
         setCalendarDataLoaded(false);
       }
     } catch (error) {
       console.error('初期日付決定エラー:', error);
-      // エラーの場合は明日の日付を使用
       const now = new Date();
       const japanTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
       const tomorrow = new Date(japanTime);
       tomorrow.setDate(japanTime.getDate() + 1);
       setSelectedDate(tomorrow.toISOString().split('T')[0]);
       setHasExistingSettings(false);
-      
-      // エラー時も標準勤務時間を読み込み
-      await loadStandardWorkTime();
+      setStartTime('09:00');
+      setEndTime('18:00');
       setNotes('');
       setCalendarEvents([]);
       setCalendarDataLoaded(false);
     } finally {
       setIsLoadingPage(false);
+      setIsInitialLoadComplete(true);
     }
   }, [user]);
 
@@ -278,17 +305,12 @@ const NextDaySettings: React.FC = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('work_date', date)
-        .single();
+        .maybeSingle();
 
       console.log('=== Supabase クエリ結果 ===', { data, error, timestamp: new Date().toISOString() });
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('既存設定読み込みエラー:', error);
-        // エラーの場合もデフォルト値を設定
-        await loadStandardWorkTime();
-        setNotes('');
-        setCalendarEvents([]);
-        setCalendarDataLoaded(false);
         setHasExistingSettings(false);
         return;
       }
@@ -296,40 +318,53 @@ const NextDaySettings: React.FC = () => {
       if (data) {
         console.log('=== 既存データが見つかりました ===', data);
         setHasExistingSettings(true);
-        // データベースの時間が '00:00:00' 形式の場合は 'HH:MM' 形式に変換
+
         const startTimeFormatted = data.start_time ? data.start_time.substring(0, 5) : '09:00';
         const endTimeFormatted = data.end_time ? data.end_time.substring(0, 5) : '18:00';
 
-        // '00:00' の場合はデフォルト値を使用
         setStartTime(startTimeFormatted === '00:00' ? '09:00' : startTimeFormatted);
         setEndTime(endTimeFormatted === '00:00' ? '18:00' : endTimeFormatted);
-
         setNotes(data.notes || '');
-        if (data.calendar_events) {
+
+        if (data.calendar_events && data.calendar_events.length > 0) {
           setCalendarEvents(data.calendar_events);
           setCalendarDataLoaded(true);
+        } else {
+          setCalendarEvents([]);
+          setCalendarDataLoaded(false);
         }
       } else {
-        console.log('=== データが見つからない場合のデフォルト値設定 ===');
+        console.log('=== データが見つからない ===');
         setHasExistingSettings(false);
-        await loadStandardWorkTime();
+
+        const { data: settings } = await supabase
+          .from('user_settings')
+          .select('default_start_time, default_end_time')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (settings) {
+          const startTimeFormatted = settings.default_start_time ? settings.default_start_time.substring(0, 5) : '09:00';
+          const endTimeFormatted = settings.default_end_time ? settings.default_end_time.substring(0, 5) : '18:00';
+          setStartTime(startTimeFormatted === '00:00' ? '09:00' : startTimeFormatted);
+          setEndTime(endTimeFormatted === '00:00' ? '18:00' : endTimeFormatted);
+        } else {
+          setStartTime('09:00');
+          setEndTime('18:00');
+        }
+
         setNotes('');
         setCalendarEvents([]);
         setCalendarDataLoaded(false);
       }
     } catch (error) {
       console.error('設定読み込みエラー:', error);
-      console.log('=== エラー発生時のデフォルト値設定 ===');
-      await loadStandardWorkTime();
-      setNotes('');
-      setCalendarEvents([]);
-      setCalendarDataLoaded(false);
       setHasExistingSettings(false);
     } finally {
       console.log('=== loadExistingSettings 完了 ===', { timestamp: new Date().toISOString() });
       setIsLoadingSettings(false);
     }
-  }, [user, loadStandardWorkTime]);
+  }, [user]);
 
   // 初期表示時の処理
   useEffect(() => {
@@ -344,32 +379,29 @@ const NextDaySettings: React.FC = () => {
 
   // 日付変更時の処理 - 初回ロード完了後のみ実行
   useEffect(() => {
-    // 初回ロード中は何もしない
-    if (isLoadingPage) return;
+    if (!isInitialLoadComplete) return;
+    if (!selectedDate) return;
 
-    console.log('=== 日付変更時の処理 ===', { selectedDate, hasCalendarPermission, calendarDataLoaded, timestamp: new Date().toISOString() });
-    if (selectedDate && selectedDate !== null) {
-      loadExistingSettings(selectedDate);
-      if (hasCalendarPermission && !calendarDataLoaded) {
-        setCalendarDataLoaded(false);
-        setCalendarEvents([]);
-        loadCalendarEvents(selectedDate);
-      }
-    }
+    console.log('=== 日付変更時の処理 ===', { selectedDate, timestamp: new Date().toISOString() });
+
+    loadExistingSettings(selectedDate);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, hasCalendarPermission]);
+  }, [selectedDate]);
 
-  // カレンダー権限が取得できた時の処理
+  // カレンダーイベント取得 - 初回ロード完了後、カレンダー権限があり、データが未取得の場合のみ
   useEffect(() => {
-    // 初回ロード中は何もしない
-    if (isLoadingPage) return;
+    if (!isInitialLoadComplete) return;
+    if (!hasCalendarPermission) return;
+    if (!selectedDate) return;
+    if (calendarDataLoaded) return;
 
-    console.log('=== カレンダー権限チェック ===', { hasCalendarPermission, selectedDate, calendarDataLoaded, timestamp: new Date().toISOString() });
-    if (hasCalendarPermission && selectedDate && selectedDate !== null && !calendarDataLoaded) {
-      loadCalendarEvents(selectedDate);
-    }
+    console.log('=== カレンダーイベント自動取得 ===', { selectedDate, timestamp: new Date().toISOString() });
+
+    loadCalendarEvents(selectedDate);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasCalendarPermission, selectedDate, calendarDataLoaded]);
+  }, [isInitialLoadComplete, hasCalendarPermission, selectedDate, calendarDataLoaded]);
 
   // 手動でスケジュール取得
   const handleFetchSchedule = () => {
