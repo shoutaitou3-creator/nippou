@@ -73,7 +73,7 @@ export const usePreviousDayReport = (user: User | null, yesterdayDateString: str
       achievements: string;
       challenges_issues: string;
       lessons_learned: string;
-      other_notes: string;
+      work_content: string;
     },
     workStartTime: string,
     workEndTime: string,
@@ -101,7 +101,7 @@ export const usePreviousDayReport = (user: User | null, yesterdayDateString: str
         achievements: reportFields.achievements,
         challenges_issues: reportFields.challenges_issues,
         lessons_learned: reportFields.lessons_learned,
-        other_notes: reportFields.other_notes,
+        work_content: reportFields.work_content,
         calendar_events: calendarEvents,
         draft_status: draftStatus,
         submitted_at: draftStatus ? null : new Date().toISOString(),

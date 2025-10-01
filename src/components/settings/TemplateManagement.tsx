@@ -15,7 +15,7 @@ const CATEGORY_LABELS: Record<ReportCategory, string> = {
   achievements: '達成できたこと',
   challenges_issues: '課題や問題点',
   lessons_learned: '次回に活かすこと',
-  other_notes: 'その他報告事項',
+  work_content: 'その他報告事項',
 };
 
 const TemplateManagement: React.FC<TemplateManagementProps> = ({

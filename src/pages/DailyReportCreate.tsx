@@ -33,7 +33,7 @@ const DailyReportCreate: React.FC = () => {
     achievements: '',
     challenges_issues: '',
     lessons_learned: '',
-    other_notes: ''
+    work_content: ''
   });
   const [workStartTime, setWorkStartTime] = useState('09:00');
   const [workEndTime, setWorkEndTime] = useState('18:00');
@@ -203,7 +203,7 @@ const DailyReportCreate: React.FC = () => {
             achievements: existingReport.achievements || '',
             challenges_issues: existingReport.challenges_issues || '',
             lessons_learned: existingReport.lessons_learned || '',
-            other_notes: existingReport.other_notes || ''
+            work_content: existingReport.work_content || ''
           });
           setWorkStartTime(existingReport.work_start_time || '09:00');
           setWorkEndTime(existingReport.work_end_time || '18:00');
@@ -281,7 +281,7 @@ const DailyReportCreate: React.FC = () => {
     achievements: reportFields.achievements,
     challenges_issues: reportFields.challenges_issues,
     lessons_learned: reportFields.lessons_learned,
-    other_notes: reportFields.other_notes,
+    work_content: reportFields.work_content,
     calendar_events: internalCalendarEvents,
     draft_status: existingReport?.draft_status ?? true,
     submitted_at: existingReport?.submitted_at || undefined,

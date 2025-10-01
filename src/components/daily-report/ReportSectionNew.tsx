@@ -9,7 +9,7 @@ interface ReportSectionNewProps {
     achievements: string;
     challenges_issues: string;
     lessons_learned: string;
-    other_notes: string;
+    work_content: string;
   };
   onFieldChange: (field: ReportCategory, value: string) => void;
   templates: UserTemplate[];
@@ -38,7 +38,7 @@ const REPORT_FIELDS: ReportField[] = [
     placeholder: '今回の経験から学んだことや次回に活かせることを記入してください...',
   },
   {
-    key: 'other_notes',
+    key: 'work_content',
     label: 'その他報告事項',
     placeholder: 'その他の報告事項があれば記入してください...',
   },

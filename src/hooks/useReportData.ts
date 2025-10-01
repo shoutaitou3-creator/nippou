@@ -102,7 +102,7 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
       achievements: string;
       challenges_issues: string;
       lessons_learned: string;
-      other_notes: string;
+      work_content: string;
     },
     calendarEvents: InternalCalendarEvent[],
     workStartTime?: string,
@@ -134,7 +134,7 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
         achievements: reportFields.achievements,
         challenges_issues: reportFields.challenges_issues,
         lessons_learned: reportFields.lessons_learned,
-        other_notes: reportFields.other_notes,
+        work_content: reportFields.work_content,
         calendar_events: calendarEvents,
         draft_status: draftStatus,
         submitted_at: draftStatus ? null : new Date().toISOString(),
@@ -171,7 +171,7 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
       achievements: string;
       challenges_issues: string;
       lessons_learned: string;
-      other_notes: string;
+      work_content: string;
     },
     calendarEvents: InternalCalendarEvent[],
     workStartTime?: string,
@@ -202,7 +202,7 @@ export const useReportData = (user: User | null, isDevMode: boolean) => {
         achievements: reportFields.achievements,
         challenges_issues: reportFields.challenges_issues,
         lessons_learned: reportFields.lessons_learned,
-        other_notes: reportFields.other_notes,
+        work_content: reportFields.work_content,
         calendar_events: calendarEvents,
         draft_status: false,
         submitted_at: new Date().toISOString(),

@@ -60,7 +60,7 @@ const PreviousDayReport: React.FC = () => {
     achievements: '',
     challenges_issues: '',
     lessons_learned: '',
-    other_notes: ''
+    work_content: ''
   });
   const [workStartTime, setWorkStartTime] = useState('09:00');
   const [workEndTime, setWorkEndTime] = useState('18:00');
@@ -224,7 +224,7 @@ const PreviousDayReport: React.FC = () => {
             achievements: report.achievements || '',
             challenges_issues: report.challenges_issues || '',
             lessons_learned: report.lessons_learned || '',
-            other_notes: report.other_notes || ''
+            work_content: report.work_content || ''
           });
           setWorkStartTime(report.work_start_time || '09:00');
           setWorkEndTime(report.work_end_time || '18:00');

@@ -21,7 +21,7 @@ interface DailyReportFormContentProps {
     achievements: string;
     challenges_issues: string;
     lessons_learned: string;
-    other_notes: string;
+    work_content: string;
   };
   onFieldChange: (field: ReportCategory, value: string) => void;
   templates: UserTemplate[];

@@ -20,7 +20,7 @@ export interface DailyReportData {
   achievements: string;
   challenges_issues: string;
   lessons_learned: string;
-  other_notes: string;
+  work_content: string;
   business_results?: string;
   challenges?: string;
   report_notes?: string;
@@ -42,7 +42,7 @@ export type ReportCategory =
   | 'achievements'
   | 'challenges_issues'
   | 'lessons_learned'
-  | 'other_notes';
+  | 'work_content';
 
 export interface UserTemplate {
   id: string;

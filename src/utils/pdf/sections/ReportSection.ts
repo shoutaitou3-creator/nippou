@@ -21,7 +21,7 @@ export class ReportSection {
       { label: 'Achievements', value: dailyReport?.achievements },
       { label: 'Challenges/Issues', value: dailyReport?.challenges_issues },
       { label: 'Lessons Learned', value: dailyReport?.lessons_learned },
-      { label: 'Other Notes', value: dailyReport?.other_notes }
+      { label: 'Work Content', value: dailyReport?.work_content }
     ];
 
     let hasContent = false;
